@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta lang="en">
+  <link rel = "stylesheet" href = "../../paint.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+  integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+  integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+  crossorigin=""></script>
+  <script src='https://d3js.org/d3.v4.min.js'></script>
+
+  <script>
+    var field_data, find_data, crop_data, class_data,owner_data,find_picUrl;
+    field_data = {{field_json}};
+    find_data = {{find_json}};
+    crop_data = {{crop_json}};
+    class_data = {{class_json}};
+    owner_data = {{owner_list}};
+    find_picUrl = {{find_picUrl}}
+  </script>
+  <title>Fields and Finds</title>
+</head>
+<body>
+  <header>
+    <div id = 'main_head_container'>
+      <h1>Field and Find </h1>
+    </div>
+
+
+  </header>
+
+  <div id = 'control_div'>
+    <div id = 'menu_container'>
+      <ul id = 'menu_list'>
+        <div id = 'tab_split'></div>
+        <li id = 'main_tab' class = 'menutab'>Home</li>
+        <div id = 'tab_split'></div>
+        <li id = 'field_tab' class = 'menutab'>Fields</li>
+        <div id = 'tab_split'></div>
+        <li id = 'find_tab' class = 'menutab'>Finds</li>
+        <div id = 'tab_split'></div>
+        <li id = 'display_tab' class = 'menutab'>Display</li>
+        <div id = 'tab_split'></div>
+        <li id = 'leaflet_tab' class = 'menutab'>Leaflet (experimental)</li>
+        <div id = 'tab_split'></div>
+      </ul>
+    </div>
+    <div id = 'main_control' class = 'control_container'>
+      <h2>Welcome.</h2>
+      <p id = 'main_intro_para'>
+        This is a simple map for displaying some fields and finds.
+      </p>
+    </div>
+      <div id = 'field_control' class = 'control_container'>
+        <h2>Search for Field</h2>
+        <form id = 'field_form'>
+          <table id = 'field_serch_table' class = 'search_control_table'>
+            <tr>
+              <td>
+                <p class = 'search_title'>crop : </p>
+              </td>
+              <td>
+                <select id = "crop_select" class = "select_option">
+                  <option value = "" disabled selected>--please select--</option>
+                  {% for crop in crop_list %}
+                  <option value = "{{crop.id}}" >{{crop.name}}</option>
+                  {% endfor %}
+
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class = 'search_title'>owner : </p>
+              </td>
+              <td>
+                <select id = "owner_select" class = "select_option">
+                  <option value = "" disabled selected>--please select--</option>
+                  {% for owner in owner_list %}
+                  <option value = "{{owner}}" >{{owner}}</option>
+                  {% endfor %}
+
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class = 'search_title'>field : </p>
+              </td>
+              <td>
+                <select id = "field_select" class = "select_option">
+                  <option value = "" disabled selected>--please select--</option>
+                  {% for field in field_list %}
+                  <option value = "{{field.id}}" >{{field.id}}</option>
+                  {% endfor %}
+
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <button type = "button" id = "clrSlt_field">Clear</buttom>
+              </td>
+            </tr>
+
+          </table>
+        </form>
+      </div>
+      <div id = 'find_control' class = 'control_container'>
+        <h2>Search for Find</h2>
+        <form>
+          <table>
+        <tr>
+          <td>
+            <p class = 'search_title'>class : </p>
+          </td>
+          <td>
+            <select id = "class_select" class = "select_option">
+              <option value = "" disabled selected>--please select--</option>
+              {% for class in class_list %}
+              <option value = "{{class.id}}" >{{class.name}}</option>
+              {% endfor %}
+
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p class = 'search_title'>find : </p>
+          </td>
+          <td>
+            <select id = "find_select" class = "select_option">
+              <option value = "" disabled selected>--please select--</option>
+              {% for find in find_list %}
+              <option value = "{{find.id}}" >{{find.id}}</option>
+              {% endfor %}
+
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <button type = "button" id = "clrSlt_find">Clear</buttom>
+          </td>
+        </tr>
+
+        </table>
+        </form>
+          
+      </div>
+      <div id = 'display_control' class = control_container>
+        <h2>Way to Display Fields</h2>
+        <form class = 'display_select' action = ''>
+          <input type="radio" name="field_display" value="byCrop" checked/> by Crop Type<br/>
+          <input type="radio" name="field_display" value="byOwner"/> by Owner<br/>
+
+        </form>
+        <h2>Way to Display Finds</h2>
+        <form class = 'display_select' action = ''>
+          <input type="radio" name="find_display" value="byType" checked> by Type<br>
+
+        </form>
+
+      </div>
+  </div>
+  <div id = "map_div">
+    <div id = 'find_legend_div'>
+      <form>
+        <h3 id = find_legend_title>Finds</h3>
+        <table id = 'find_legend_table'>
+        </table>
+      </form>
+
+    </div>
+    <div id = 'field_legend_div'>
+      <form>
+        <h3 id = field_legend_title>Fields</h3>
+        <table id = 'field_legend_table'>
+        </table>
+      </form>
+
+    </div>
+
+
+    {# ==================================================this is the part used to draw svg before
+
+      <svg height = "25cm" width = "25cm" id = "map_svg">
+      <g transform = "scale(40,-40) translate(1,-18)" id = "map_g">
+        {% for lineCoor in lineCoor_list%}
+        <line class = "xgridline" x1 = "0" y1 = "{{lineCoor}}" x2 = "16" y2 = "{{lineCoor}}" />
+        <line class = "ygridline" x1 = "{{lineColor}}" y1 = "0" x2 = "{{lineCoor}}" y2 = "16" />
+        {% endfor %}
+        {% for fieldRect in fieldRect_list %}
+        <rect id = "{{fieldRect.rect_id}}" title = "{{fieldRect.rect_id}}" class = "field_rect" x = "{{fieldRect.rect_x}}" y = "{{fieldRect.rect_y}}" height = "{{fieldRect.rect_height}}" width = "{{fieldRect.rect_width}}" />
+        {% endfor %}
+        {% for findLoc in findLoc_list %}
+        <circle id = "{{findLoc.loc_id}}" class = "find_loc" cx = "{{findLoc.loc_x}}" cy = "{{findLoc.loc_y}}" r = "0.3"/>
+        {% endfor %}
+        <line id = "xaxis" class = "axis" x1 = "0" y1 = "0" x2 = "16.5" y2 = "0" />
+        <line id = "yaxis" class = "axis" x1 = "0" y1 = "0" x2 = "0" y2 = "16.5" />
+
+        <rect id = "map_legend" class = "legend" x = "12.8" y = "0.5" height = "3" width = "3" />
+        <text id = "legend_text" x = "13.2" y = "-2.8">Legend</text>
+      </g>
+    </svg>
+
+    ================================================================
+    #}
+
+  </div>
+  <div id = 'lf_map_div'>
+
+  </div>
+  <footer>
+    <p>this is sme informaiton to put in the foot part
+  </footer>
+
+
+</body>
+
+<script src="../../fnf.js"></script>
+
+
+
+</html>
